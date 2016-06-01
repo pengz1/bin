@@ -1,0 +1,60 @@
+#!/bin/bash
+#!/usr/bin/expect
+#Program:
+#    This program is used to send IPMI commands for Intel servers
+#    Below commands are supported
+#    -p ipaddress: power cycle
+#    -on ipaddress: power on a node
+#    -off ipaddress: power off a node
+#    -fru ipaddress: get fru information
+#    -s ipaddress: get nodes power status
+#History:
+#    Created on 20150823
+#For Intel WB
+USERNAME=onrack
+PASSWORD=onrack
+
+#For Quanta WB
+#username="admin"
+#password="admin"
+
+#For vBMC
+#username="admin"
+#password="admin"
+
+if [ $# = 1 ]; then
+# ssh-keygen -f '/home/pengz1/.ssh/known_hosts' -R 192.168.128.${1}
+ 	IP="192.168.128.$1"
+ 	#sshStr=`ssh $USERNAME@$IP`
+else
+    while getopts 'i:u:p:' OPT; do
+        case $OPT in
+            i)
+                IP=$OPTARG
+                #STACK_IP=$IP
+                #BMC_IP="192.168.188.$IP"
+                ;;
+            u)
+                USERNAME=$OPTARG
+                ;;
+            p)
+                PASSWORD=$OPTARG
+                ;;
+            ?)
+                echo "Invalide parameter $1"
+                exit0
+        esac
+    done
+fi
+#sshStr=`ssh $USERNAME@$IP`
+ssh-keygen -f "/home/onrack/.ssh/known_hosts" -R $IP
+expect -c "
+ 	spawn ssh ${USERNAME}@$IP
+ 	expect {
+	\"*yes/no\" { send \"yes\r\"; exp_continue }
+	\"*password:\" { send \"${PASSWORD}\r\" }
+	}
+	interact
+	"
+exit 0
+
