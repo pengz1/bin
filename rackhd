@@ -1,0 +1,84 @@
+#!/bin/bash
+#!/usr/bin/expect
+#Program:
+#History:
+#    Created on 20160603
+opr_type="node"
+curl_opr="GET"
+operator="BootstrapUbuntuMocks"
+id=""
+server_ip="localhost:8080"
+style=" python -m json.tool"
+data=""
+
+while getopts 'i:nspa:h:D:C:c:W:M:w:' OPT; do
+    case $OPT in
+        i)
+            id=$OPTARG
+            ;;
+        n)
+            opr_type="nodes"
+            ;;
+        s)
+            opr_type="skus"
+            ;;
+        p)
+            opr_type="pollers"
+            ;;
+        a)
+            server_ip=$OPTARG
+            ;;
+        h)
+            curl_opr="POST"
+            data=$OPTARG
+            ;;
+        D)
+            curl_opr="DELETE"
+            id=$OPTARG
+            ;;
+        C)
+            curl_opr="GET"
+            operator="catalogs"
+            id=$OPTARG
+            ;;
+        c)
+            curl_opr="GET"
+            operator="catalogs/"$OPTARG
+            ;;
+        W)
+            curl_opr="GET"
+            operator="workflows/active"
+            id=$OPTARG
+            ;;
+        M)
+            curl_opr="POST"
+            operator="workflows?name=operator.BootstrapUbuntuMocks"
+            id=$OPTARG
+            ;;
+        w)
+            curl_opr="POST"
+            operator="workflows?name=operator."$OPTARG
+            id=$OPTARG
+            ;;
+        ?)
+            echo "Invalide parameter"
+            exit 0
+    esac
+done
+
+if [ "$id" == "" ]; then
+    set -x 
+    curl -X $curl_opr $server_ip/api/common/$opr_type | $style
+    set -x 
+elif [ "$data" != "" ]; then
+    set -x 
+    curl -X $curl_opr -H 'Content-Type: application/json' -d @$data $server_ip/api/common/$opr_type/$id/$operator | $style
+    set -x 
+else
+    set -x 
+    curl -X $curl_opr $server_ip/api/common/$opr_type/$id/$operator | $style
+    set -x 
+fi
+
+exit 0
+

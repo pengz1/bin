@@ -1,0 +1,68 @@
+#!/bin/bash
+#Program:
+#    This program is used to send IPMI commands 
+#    Below commands are supported
+#    -p ipaddress: power cycle
+#    -on ipaddress: power on a node
+#    -off ipaddress: power off a node
+#    -fru ipaddress: get fru information
+#    -s ipaddress: get nodes power status
+#History:
+#    Created on 20150823
+USERNAME=admin
+PASSWORD=admin
+
+#For Quanta WB
+#username="admin"
+#password="admin"
+
+#For vBMC
+#username="admin"
+#password="admin"
+
+while getopts 'Ii:u:p:a:o:POXMF' OPT; do
+    case $OPT in
+        I)
+            USERNAME=root
+            PASSWORD=1234567
+            ;;
+        i)
+            IP="192.168.188."$OPTARG
+            ;;
+        p)
+            PASSWORD=$OPTARG
+            ;;
+        u)
+            USERNAME=$OPTARG
+            ;;
+        a)
+            IP=$OPTARG
+            ;;
+        o)
+            Operation=$OPTARG
+            ;;
+        P)
+            Operation="chassis power cycle"
+            ;;
+        O)
+            Operation="chassis power on"
+            ;;
+        S)
+            Operation="chassis power off"
+            ;;
+        M)
+            Operation="mc reset cold"
+            ;;
+        F)
+            Operation="fru"
+            ;;
+        ?)
+            echo "Invalide parameter $1"
+            exit0
+    esac
+done
+set -x
+ipmitool -I lanplus -U $USERNAME -P $PASSWORD -H $IP $Operation #chassis power cycle
+
+exit 0
+
