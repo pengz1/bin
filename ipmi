@@ -20,13 +20,13 @@ PASSWORD=admin
 #username="admin"
 #password="admin"
 
-while getopts 'Ii:u:p:a:o:POXMF' OPT; do
+while getopts 'IA:u:p:a:o:POXRF' OPT; do
     case $OPT in
         I)
             USERNAME=root
             PASSWORD=1234567
             ;;
-        i)
+        a)
             IP="192.168.188."$OPTARG
             ;;
         p)
@@ -35,7 +35,7 @@ while getopts 'Ii:u:p:a:o:POXMF' OPT; do
         u)
             USERNAME=$OPTARG
             ;;
-        a)
+        A)
             IP=$OPTARG
             ;;
         o)
@@ -50,11 +50,17 @@ while getopts 'Ii:u:p:a:o:POXMF' OPT; do
         S)
             Operation="chassis power off"
             ;;
-        M)
+        R)
             Operation="mc reset cold"
             ;;
         F)
             Operation="fru"
+            ;;
+        L)
+            Operation="chassis identify on"
+            ;;
+        E)
+            Operation="chassis identify off"
             ;;
         ?)
             echo "Invalide parameter $1"

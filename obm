@@ -1,0 +1,51 @@
+#!/bin/bash
+#Program:
+#    This program is used to send IPMI commands 
+#    Below commands are supported
+#    -p ipaddress: power cycle
+#    -on ipaddress: power on a node
+#    -off ipaddress: power off a node
+#    -fru ipaddress: get fru information
+#    -s ipaddress: get nodes power status
+#History:
+#    Created on 20150823
+USERNAME=admin
+PASSWORD=admin
+IP=""
+NODE=""
+#For Quanta WB
+#username="admin"
+#password="admin"
+
+#For vBMC
+#username="admin"
+#password="admin"
+
+while getopts 'Ii:a:' OPT; do
+    case $OPT in
+        I)
+            USERNAME=root
+            PASSWORD=1234567
+            ;;
+        i)
+            NODE=$OPTARG
+            ;;
+        a)
+            IP=192.168.188.$OPTARG
+            ;;
+        A)
+            IP=$OPTARG
+            ;;
+        ?)
+            echo "Invalide parameter $1"
+            exit0
+    esac
+done
+obm_setting="{\"obmSettings\":[{\"service\":\"ipmi-obm-service\",\"config\":{\"user\":\"$USERNAME\",\"password\":\"$PASSWORD\",\"host\":\"$IP\"}}]}"
+set +x
+curl -X PATCH -H "Content-Type: application/json" --data $obm_setting localhost:8080/api/common/nodes/$NODE
+set -x
+
+
+exit 0
+

@@ -3,19 +3,16 @@
 #Program:
 #History:
 #    Created on 20160603
-opr_type="node"
+opr_type="nodes"
 curl_opr="GET"
-operator="BootstrapUbuntuMocks"
+operator=""
 id=""
 server_ip="localhost:8080"
 style=" python -m json.tool"
 data=""
 
-while getopts 'i:nspa:h:D:C:c:W:M:w:' OPT; do
+while getopts 'i:nspa:h:DC:c:W:M:w:' OPT; do
     case $OPT in
-        i)
-            id=$OPTARG
-            ;;
         n)
             opr_type="nodes"
             ;;
@@ -25,6 +22,12 @@ while getopts 'i:nspa:h:D:C:c:W:M:w:' OPT; do
         p)
             opr_type="pollers"
             ;;
+        D)
+            curl_opr="DELETE"
+            ;;
+        i)
+            id=$OPTARG
+            ;;
         a)
             server_ip=$OPTARG
             ;;
@@ -32,33 +35,25 @@ while getopts 'i:nspa:h:D:C:c:W:M:w:' OPT; do
             curl_opr="POST"
             data=$OPTARG
             ;;
-        D)
-            curl_opr="DELETE"
-            id=$OPTARG
-            ;;
         C)
-            curl_opr="GET"
             operator="catalogs"
             id=$OPTARG
             ;;
         c)
-            curl_opr="GET"
             operator="catalogs/"$OPTARG
             ;;
         W)
-            curl_opr="GET"
             operator="workflows/active"
             id=$OPTARG
             ;;
         M)
             curl_opr="POST"
-            operator="workflows?name=operator.BootstrapUbuntuMocks"
+            operator="workflows?name=BootstrapUbuntuMocks"
             id=$OPTARG
             ;;
         w)
             curl_opr="POST"
-            operator="workflows?name=operator."$OPTARG
-            id=$OPTARG
+            operator="workflows?name="$OPTARG
             ;;
         ?)
             echo "Invalide parameter"
@@ -69,6 +64,10 @@ done
 if [ "$id" == "" ]; then
     set -x 
     curl -X $curl_opr $server_ip/api/common/$opr_type | $style
+    set -x 
+elif [ "$operator" == "" ]; then
+    set -x 
+    curl -X $curl_opr $server_ip/api/common/$opr_type/$id | $style
     set -x 
 elif [ "$data" != "" ]; then
     set -x 

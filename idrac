@@ -1,0 +1,43 @@
+#!/bin/bash
+#Program:
+#    This program is used to send IPMI commands 
+#    Below commands are supported
+#    -p ipaddress: power cycle
+#    -on ipaddress: power on a node
+#    -off ipaddress: power off a node
+#    -fru ipaddress: get fru information
+#    -s ipaddress: get nodes power status
+#History:
+#    Created on 20150823
+USERNAME=admin
+PASSWORD=admin
+
+#For Quanta WB
+#username="admin"
+#password="admin"
+
+#For vBMC
+#username="admin"
+#password="admin"
+
+while getopts 'A:a:o:' OPT; do
+    case $OPT in
+        a)
+            IP="192.168.188."$OPTARG
+            ;;
+        A)
+            IP=$OPTARG
+            ;;
+        o)
+            Operation=$OPTARG
+            ;;
+        ?)
+            echo "Invalide parameter $1"
+            exit0
+    esac
+done
+set -x
+sudo /opt/dell/srvadmin/sbin/racadm -r $IP -u $USERNAME -p $PASSWORD $Operation #chassis power cycle
+
+exit 0
+
