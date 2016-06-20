@@ -1,0 +1,56 @@
+#!/bin/bash
+#Program:
+#    This program is used to run unit test commands under node
+#History:
+#    Created on 20160616
+code=""
+unit_test=""
+opr_code=0
+while getopts 'u:d:c:r:' OPT; do
+    case $OPT in
+        d)#Run unit test under debug mode
+            code=$OPTARG
+            opr_code=1; 
+            ;;
+        c)#Use jshint to check grammar for code and its unit test document
+            code=$OPTARG
+            opr_code=2 
+            ;;
+        r)#Report test coverage
+            code=$OPTARG
+            opr_code=3 
+            ;;
+        u)#Run unit test for a document
+            code=$OPTARG
+            opr_code=4
+            ;;
+        ?)
+            echo "Invalide parameter $1"
+            exit0
+    esac
+done
+code=${code/%".js"/''}
+if [ "$opr_code" == "1" ]; then
+    set -x
+    ./node_modules/mocha/bin/mocha debug spec/${code}-spec.js -R spec --require spec/helper.js
+    set +x
+elif [ "$opr_code" == "2" ]; then
+    set -x
+    ./node_modules/.bin/jshint -c .jshintrc --reporter=checkstyle ${code}.js spec/${code}-spec.js
+    set +x
+elif [ "$opr_code" == "3" ]; then
+    set -x
+    ./node_modules/.bin/istanbul cover -x spec/${code}-spec.js ./node_modules/.bin/_mocha -- spec/${code}-spec.js -R xunit-file --require spec/helper.js
+    ./node_modules/.bin/istanbul report cobertura
+    set +x
+elif [ "$opr_code" == "4" ]; then
+    set -x
+    ./node_modules/mocha/bin/mocha spec/${code}-spec.js -R spec --require spec/helper.js
+    set +x
+else
+    echo "Invalide parameters"
+    exit 1
+fi
+    
+exit 0
+

@@ -1,0 +1,32 @@
+#!/usr/bin/expect -f
+#Program:
+#    This program is used to send IPMI commands for Intel servers
+#    Below commands are supported
+#    -p ipaddress: power cycle
+#    -on ipaddress: power on a node
+#    -off ipaddress: power off a node
+#    -fru ipaddress: get fru information
+#    -s ipaddress: get nodes power status
+#History:
+#    Created on 20150823
+#For Intel WB
+set IP [lindex $argv 0]
+set USERNAME [lindex $argv 1]
+set PASSWORD [lindex $argv 2]
+set timeout 10
+spawn ssh -l ${USERNAME} $IP
+#expect {
+#    "*yes/no" { send "yes\r"; exp_continue }
+#    "*password:" { send "${PASSWORD}\r"; exp_continue }
+#    "*" { send "sudo mkdir \\mnt\\krein\r"; exp_continue}
+#    "*password:" { send "${PASSWORD}\r"; exp_continue }
+#    "*" { send "sudo mount -t cifs //192.168.191.207/share /mnt/krein -o  username=onrack,password=onrack,ro\r"; exp_continue}
+#    "*password:" { send "${PASSWORD}\r"}
+#}
+expect "*yes/no" { send "yes\r"}
+expect "*password:" { send "${PASSWORD}\r" }
+expect "onrack*" { send "sudo mkdir /mnt/krein\r" }
+expect "*password*" { send "${PASSWORD}\r" }
+expect "onrack*" { send "sudo mount -t cifs //192.168.191.207/share /mnt/krein -o  username=onrack,password=onrack,ro\r"}
+interact
+

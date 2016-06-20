@@ -1,5 +1,4 @@
 #!/bin/bash
-#!/usr/bin/expect
 #Program:
 #    This program is used to send IPMI commands for Intel servers
 #    Below commands are supported
@@ -23,9 +22,7 @@ PASSWORD=onrack
 #password="admin"
 
 if [ $# = 1 ]; then
-# ssh-keygen -f '/home/pengz1/.ssh/known_hosts' -R 192.168.128.${1}
- 	IP="192.168.128.$1"
- 	#sshStr=`ssh $USERNAME@$IP`
+    IP="192.168.128.$1"
 else
     while getopts 'i:u:p:' OPT; do
         case $OPT in
@@ -46,15 +43,8 @@ else
         esac
     done
 fi
-#sshStr=`ssh $USERNAME@$IP`
 ssh-keygen -f "/home/onrack/.ssh/known_hosts" -R $IP
-expect -c "
- 	spawn ssh ${USERNAME}@$IP
- 	expect {
-	\"*yes/no\" { send \"yes\r\"; exp_continue }
-	\"*password:\" { send \"${PASSWORD}\r\" }
-	}
-	interact
-	"
-exit 0
+
+~/bin/.script/expect_ssl $IP $USERNAME $PASSWORD
+
 
