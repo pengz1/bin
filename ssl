@@ -24,9 +24,9 @@ PASSWORD=onrack
 if [ $# = 1 ]; then
     IP="192.168.128.$1"
 else
-    while getopts 'i:u:p:' OPT; do
+    while getopts 'a:u:p:' OPT; do
         case $OPT in
-            i)
+            a)
                 IP=$OPTARG
                 #STACK_IP=$IP
                 #BMC_IP="192.168.188.$IP"

@@ -1,0 +1,51 @@
+#!/bin/bash
+#Program:
+#    This program is used to send IPMI commands 
+operation=restart
+log_opr='less -R'
+repo="/opt/onrack/bin/monorail"
+while getopts 'rsclOHTDt' OPT; do
+    case $OPT in
+        r)
+            operation=restart
+            ;;
+        s)
+            operation=stop
+            ;;
+        c)
+            operation=status
+            ;;
+        l)
+            operation=log
+            ;;
+        t)
+            cd src/on-tools/dev_tools;sudo node sniff.js "on.events" "#"
+            exit 0
+            ;;
+        D)
+            log_opr='rm'
+            operation=log
+            ;;
+        H)
+            repo="on-http"
+            ;;
+        T)
+            repo="on-taskgraph" 
+            ;;
+        O)
+            repo="/opt/onrack/bin/monorail"
+            ;;
+        ?)
+            echo "Invalide parameter $1"
+            exit 1
+    esac
+done
+
+if [ "$operation" == "log" ]; then
+    sudo $log_opr /var/log/upstart/${repo}.log
+elif [ "$repo" == "/opt/onrack/bin/monorail" ]; then
+    sudo /opt/onrack/bin/monorail $operation
+else
+    sudo service $repo $operation
+fi
+

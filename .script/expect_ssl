@@ -14,19 +14,18 @@ set IP [lindex $argv 0]
 set USERNAME [lindex $argv 1]
 set PASSWORD [lindex $argv 2]
 set timeout 10
-spawn ssh -l ${USERNAME} $IP
-#expect {
-#    "*yes/no" { send "yes\r"; exp_continue }
-#    "*password:" { send "${PASSWORD}\r"; exp_continue }
-#    "*" { send "sudo mkdir \\mnt\\krein\r"; exp_continue}
-#    "*password:" { send "${PASSWORD}\r"; exp_continue }
-#    "*" { send "sudo mount -t cifs //192.168.191.207/share /mnt/krein -o  username=onrack,password=onrack,ro\r"; exp_continue}
-#    "*password:" { send "${PASSWORD}\r"}
-#}
+set ls_output "1"
+spawn ssh -t ${USERNAME}@$IP 
 expect "*yes/no" { send "yes\r"}
 expect "*password:" { send "${PASSWORD}\r" }
-expect "onrack*" { send "sudo mkdir /mnt/krein\r" }
-expect "*password*" { send "${PASSWORD}\r" }
-expect "onrack*" { send "sudo mount -t cifs //192.168.191.207/share /mnt/krein -o  username=onrack,password=onrack,ro\r"}
+expect "onrack*" { set timeout 1; send "ls -l /mnt/krein/bin\r"}
+expect -re "total*" {set ls_output "0"}
+if {"$ls_output"=="1"} {
+    send "sudo mkdir /mnt/krein\r"
+    expect "*password*" { send "${PASSWORD}\r" }
+    expect "onrack*" { send "sudo mount -t cifs //192.168.191.207/share /mnt/krein -o  username=onrack,password=onrack,ro\r"}
+    expect "onrack*" { send "ln -sv /mnt/krein/bin bin\r"}
+    expect "onrack*" { send "source ~/.profile\r"}
+}
 interact
 
