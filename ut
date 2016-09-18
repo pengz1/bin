@@ -30,6 +30,7 @@ while getopts 'u:d:c:r:' OPT; do
     esac
 done
 code=${code/%".js"/''}
+code=${code/%".json"/''}
 if [ "$opr_code" == "1" ]; then
     set -x
     ./node_modules/mocha/bin/mocha debug spec/${code}-spec.js -R spec --require spec/helper.js

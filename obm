@@ -21,7 +21,7 @@ NODE=""
 #username="admin"
 #password="admin"
 
-while getopts 'Ii:a:' OPT; do
+while getopts 'Ii:a:A:' OPT; do
     case $OPT in
         I)
             USERNAME=root
@@ -42,9 +42,9 @@ while getopts 'Ii:a:' OPT; do
     esac
 done
 obm_setting="{\"obmSettings\":[{\"service\":\"ipmi-obm-service\",\"config\":{\"user\":\"$USERNAME\",\"password\":\"$PASSWORD\",\"host\":\"$IP\"}}]}"
-set +x
-curl -X PATCH -H "Content-Type: application/json" --data $obm_setting localhost:8080/api/common/nodes/$NODE
 set -x
+curl -X PATCH -H "Content-Type: application/json" --data $obm_setting localhost:8080/api/common/nodes/$NODE | python -mjson.tool
+set +x
 
 
 exit 0

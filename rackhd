@@ -10,7 +10,7 @@ id=""
 server_ip="localhost:8080"
 style=" python -m json.tool"
 data=""
-
+version="1.1"
 while getopts 'i:nspa:h:DC:c:W:M:w:' OPT; do
     case $OPT in
         n)
@@ -60,22 +60,21 @@ while getopts 'i:nspa:h:DC:c:W:M:w:' OPT; do
             exit 0
     esac
 done
-
 if [ "$id" == "" ]; then
     set -x 
-    curl -X $curl_opr $server_ip/api/common/$opr_type | $style
+    curl -X $curl_opr $server_ip/api/$version/$opr_type | $style
     set -x 
 elif [ "$operator" == "" ]; then
     set -x 
-    curl -X $curl_opr $server_ip/api/common/$opr_type/$id | $style
+    curl -X $curl_opr $server_ip/api/$version/$opr_type/$id | $style
     set -x 
 elif [ "$data" != "" ]; then
     set -x 
-    curl -X $curl_opr -H 'Content-Type: application/json' -d @$data $server_ip/api/common/$opr_type/$id/$operator | $style
+    curl -X $curl_opr -H 'Content-Type: application/json' -d @$data $server_ip/api/$version/$opr_type/$id/$operator | $style
     set -x 
 else
     set -x 
-    curl -X $curl_opr $server_ip/api/common/$opr_type/$id/$operator | $style
+    curl -X $curl_opr $server_ip/api/$version/$opr_type/$id/$operator | $style
     set -x 
 fi
 
