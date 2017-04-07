@@ -20,7 +20,7 @@ PASSWORD=admin
 #username="admin"
 #password="admin"
 
-while getopts 'IA:u:p:a:o:POXRF' OPT; do
+while getopts 'IA:u:p:a:o:PSOXRFLE' OPT; do
     case $OPT in
         I)
             USERNAME=root
@@ -57,10 +57,10 @@ while getopts 'IA:u:p:a:o:POXRF' OPT; do
             Operation="fru"
             ;;
         L)
-            Operation="chassis identify on"
+            Operation="chassis identify force"
             ;;
         E)
-            Operation="chassis identify off"
+            Operation="chassis identify 0"
             ;;
         ?)
             echo "Invalide parameter $1"

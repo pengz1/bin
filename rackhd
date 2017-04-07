@@ -3,57 +3,76 @@
 #Program:
 #History:
 #    Created on 20160603
-opr_type="nodes"
-curl_opr="GET"
-operator=""
-id=""
-server_ip="localhost:8080"
+
+# Operations
+# Get information by type: type
+# Get information by id: type, id
+# Delete information by id: type, id
+# POST information by type: type
+
+# Get node specified information of a type: nodeId, type
+# POST node specified information of a type with data: nodeId, type, data 
+
+opr_type="nodes" # skus, tags, workflows, catalogs, hooks, obms, pollers
+curl_opr="GET" # POST, DELETE
+node_operator="" # workflows, catalogs, pollers
+id="" #skus, tags, workflows, catalogs, hooks, obms, pollers, nodes
+server_ip="http://172.31.128.1:9080"
 style=" python -m json.tool"
+#style=" jq ."
 data=""
-version="1.1"
-while getopts 'i:nspa:h:DC:c:W:M:w:' OPT; do
+version="current"
+while getopts 'nlsphDi:A:d:C:c:W:M:w:' OPT;
+do
     case $OPT in
-        n)
+        n) #node
             opr_type="nodes"
             ;;
-        s)
+        s) #sku
             opr_type="skus"
             ;;
-        p)
+        l) #lookups
+            opr_type="lookups"
+            ;;
+        p) #pollers
             opr_type="pollers"
+            ;;
+        h)
+            opr_type="hooks"
             ;;
         D)
             curl_opr="DELETE"
+            data='{"command": "cancel"}'
             ;;
-        i)
+        i) #id
             id=$OPTARG
             ;;
-        a)
+        A) #address
             server_ip=$OPTARG
             ;;
-        h)
+        d) #-d, data
             curl_opr="POST"
             data=$OPTARG
             ;;
         C)
-            operator="catalogs"
+            node_operator="catalogs"
             id=$OPTARG
             ;;
         c)
-            operator="catalogs/"$OPTARG
+            node_operator="catalogs/"$OPTARG
             ;;
-        W)
-            operator="workflows/active"
+        W) #workflow
+            node_operator="workflows/active"
             id=$OPTARG
             ;;
-        M)
+        M) #boot strap ubuntu Mocks
             curl_opr="POST"
-            operator="workflows?name=BootstrapUbuntuMocks"
+            node_operator="workflows?name=BootstrapUbuntuMocks"
             id=$OPTARG
             ;;
         w)
             curl_opr="POST"
-            operator="workflows?name="$OPTARG
+            node_operator="workflows?name=Graph."$OPTARG
             ;;
         ?)
             echo "Invalide parameter"
@@ -61,21 +80,21 @@ while getopts 'i:nspa:h:DC:c:W:M:w:' OPT; do
     esac
 done
 if [ "$id" == "" ]; then
-    set -x 
+    set -x
     curl -X $curl_opr $server_ip/api/$version/$opr_type | $style
-    set -x 
-elif [ "$operator" == "" ]; then
-    set -x 
+    set +x
+elif [ "$node_operator" == "" ]; then
+    set -x
     curl -X $curl_opr $server_ip/api/$version/$opr_type/$id | $style
-    set -x 
+    set +x
 elif [ "$data" != "" ]; then
-    set -x 
-    curl -X $curl_opr -H 'Content-Type: application/json' -d @$data $server_ip/api/$version/$opr_type/$id/$operator | $style
-    set -x 
+    set -x
+    curl -X $curl_opr -H 'Content-Type: application/json' -d @$data $server_ip/api/$version/$opr_type/$id/$node_operator | $style
+    set +x
 else
-    set -x 
-    curl -X $curl_opr $server_ip/api/$version/$opr_type/$id/$operator | $style
-    set -x 
+    set -x
+    curl -X $curl_opr $server_ip/api/$version/$opr_type/$id/$node_operator | $style
+    set +x
 fi
 
 exit 0

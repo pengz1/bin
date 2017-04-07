@@ -41,9 +41,9 @@ while getopts 'Ii:a:A:' OPT; do
             exit0
     esac
 done
-obm_setting="{\"obmSettings\":[{\"service\":\"ipmi-obm-service\",\"config\":{\"user\":\"$USERNAME\",\"password\":\"$PASSWORD\",\"host\":\"$IP\"}}]}"
+obm_setting="{\"service\":\"ipmi-obm-service\",\"config\":{\"user\":\"$USERNAME\",\"password\":\"$PASSWORD\",\"host\":\"$IP\"},\"nodeId\":\"$NODE\"}"
 set -x
-curl -X PATCH -H "Content-Type: application/json" --data $obm_setting localhost:8080/api/common/nodes/$NODE | python -mjson.tool
+curl -X PUT -H "Content-Type: application/json" --data $obm_setting localhost:8080/api/current/obms | python -mjson.tool
 set +x
 
 
