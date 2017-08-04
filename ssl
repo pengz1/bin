@@ -9,30 +9,26 @@
 #    -s ipaddress: get nodes power status
 #History:
 #    Created on 20150823
-#For Intel WB
-USERNAME=onrack
-PASSWORD=onrack
-
-#For Quanta WB
-#username="admin"
-#password="admin"
-
-#For vBMC
-#username="admin"
-#password="admin"
+USERNAME=vagrant
+PASSWORD=vagrant
 
 if [ $# = 1 ]; then
     IP="192.168.128.$1"
 else
-    while getopts 'A:u:p:' OPT; do
+    while getopts 'A:u:p:v:' OPT; do
         case $OPT in
             A)
                 IP=$OPTARG
                 #STACK_IP=$IP
                 #BMC_IP="192.168.188.$IP"
                 ;;
+            v)
+                USERNAME='vagrant'
+                PASSWORD='vagrant'
+                IP="192.168.128.$OPTARG"
+                ;;
             u)
-                USERNAME=$OPTARG
+                USERNAME="$OPTARG"
                 ;;
             p)
                 PASSWORD=$OPTARG
@@ -43,6 +39,7 @@ else
         esac
     done
 fi
+echo $IP $USENAME $PASSWORD
 ssh-keygen -f "/home/onrack/.ssh/known_hosts" -R $IP
 
 ~/bin/.script/expect_ssl $IP $USERNAME $PASSWORD

@@ -6,6 +6,6 @@ do
     for i in $PID
     do
         echo "killing process $arg $i ..."
-        kill -9 $i
+        sudo kill -9 $i
     done 
 done

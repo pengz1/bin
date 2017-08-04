@@ -1,101 +1,45 @@
 #!/bin/bash
-#!/usr/bin/expect
-#Program:
-#History:
-#    Created on 20160603
-
-# Operations
-# Get information by type: type
-# Get information by id: type, id
-# Delete information by id: type, id
-# POST information by type: type
-
-# Get node specified information of a type: nodeId, type
-# POST node specified information of a type with data: nodeId, type, data 
-
-opr_type="nodes" # skus, tags, workflows, catalogs, hooks, obms, pollers
-curl_opr="GET" # POST, DELETE
-node_operator="" # workflows, catalogs, pollers
-id="" #skus, tags, workflows, catalogs, hooks, obms, pollers, nodes
-server_ip="http://172.31.128.1:9080"
-style=" python -m json.tool"
-#style=" jq ."
-data=""
-version="current"
-while getopts 'nlsphDi:A:d:C:c:W:M:w:' OPT;
-do
-    case $OPT in
-        n) #node
-            opr_type="nodes"
-            ;;
-        s) #sku
-            opr_type="skus"
-            ;;
-        l) #lookups
-            opr_type="lookups"
-            ;;
-        p) #pollers
-            opr_type="pollers"
-            ;;
-        h)
-            opr_type="hooks"
-            ;;
-        D)
-            curl_opr="DELETE"
-            data='{"command": "cancel"}'
-            ;;
-        i) #id
-            id=$OPTARG
-            ;;
-        A) #address
-            server_ip=$OPTARG
-            ;;
-        d) #-d, data
-            curl_opr="POST"
-            data=$OPTARG
-            ;;
-        C)
-            node_operator="catalogs"
-            id=$OPTARG
-            ;;
-        c)
-            node_operator="catalogs/"$OPTARG
-            ;;
-        W) #workflow
-            node_operator="workflows/active"
-            id=$OPTARG
-            ;;
-        M) #boot strap ubuntu Mocks
-            curl_opr="POST"
-            node_operator="workflows?name=BootstrapUbuntuMocks"
-            id=$OPTARG
-            ;;
-        w)
-            curl_opr="POST"
-            node_operator="workflows?name=Graph."$OPTARG
-            ;;
-        ?)
-            echo "Invalide parameter"
-            exit 0
-    esac
-done
-if [ "$id" == "" ]; then
-    set -x
-    curl -X $curl_opr $server_ip/api/$version/$opr_type | $style
-    set +x
-elif [ "$node_operator" == "" ]; then
-    set -x
-    curl -X $curl_opr $server_ip/api/$version/$opr_type/$id | $style
-    set +x
-elif [ "$data" != "" ]; then
-    set -x
-    curl -X $curl_opr -H 'Content-Type: application/json' -d @$data $server_ip/api/$version/$opr_type/$id/$node_operator | $style
-    set +x
-else
-    set -x
-    curl -X $curl_opr $server_ip/api/$version/$opr_type/$id/$node_operator | $style
-    set +x
+#local_path=$(dirname "$0")
+local_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+local_path=${local_path%'/bin'}
+#echo $local_path
+#remote_path=`echo $local_path | grep mnt`
+except=( 'service' '--start' '--stop' '--status' '--restart' )
+len=${#except[*]}
+#i=0
+flag=0
+set +
+if [[ $# = 0 ]]; then
+    echo 'Error: No argument is provided'
+    exit
 fi
-
-exit 0
-
+while [[ $i -lt $len ]]
+do
+    if [[ $1 = ${except[$i]} ]]; then
+        flag=1
+        break
+    fi
+    let i++
+done
+#result=$(${local_path}/_src/rackhd-cli/rackhd $*)
+if [[ ${local_path} = '/home/vagrant' ]]; then
+    local_path='/mnt/krein' ## For remote mount usage on physical stack
+fi
+if [[ $flag = 1 ]]; then
+    sudo ${local_path}/_src/rackhd-cli/rackhd $*
+else
+    result=$(${local_path}/_src/rackhd-cli/rackhd $*)
+    exit_status=$?
+    if [[ $exit_status = 0 ]]; then
+        json_result=$(echo $result | python -mjson.tool)
+        json_status=$?
+        if [[ "$json_status" = "0" ]]; then
+            echo -n $result | python -mjson.tool
+        else
+            echo -n $result
+        fi
+    else
+        echo $result
+    fi
+fi
+set -

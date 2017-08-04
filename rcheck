@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# RackHD code check list
+code=$1
+unittest=$2
+promise_check = `grep \'Promise\' ${code}`
+mocha_last_dot_check = `grep "expect.*;" ${unittest}`
+expect_last_dot_items = ( 'called' 'notCalled' 'calledOnce' 'calledTwice' 'calledThrice')
+
+if [[ promise_check = '' ]]; then
+    echo "Warning: no bluebird promise"
+fi

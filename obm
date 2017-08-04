@@ -21,7 +21,7 @@ NODE=""
 #username="admin"
 #password="admin"
 
-while getopts 'Ii:a:A:' OPT; do
+while getopts 'Ii:a:A:u:p:' OPT; do
     case $OPT in
         I)
             USERNAME=root
@@ -29,6 +29,12 @@ while getopts 'Ii:a:A:' OPT; do
             ;;
         i)
             NODE=$OPTARG
+            ;;
+        u)
+            USERNAME=$OPTARG
+            ;;
+        p)
+            PASSWORD=$OPTARG
             ;;
         a)
             IP=192.168.188.$OPTARG
@@ -43,7 +49,7 @@ while getopts 'Ii:a:A:' OPT; do
 done
 obm_setting="{\"service\":\"ipmi-obm-service\",\"config\":{\"user\":\"$USERNAME\",\"password\":\"$PASSWORD\",\"host\":\"$IP\"},\"nodeId\":\"$NODE\"}"
 set -x
-curl -X PUT -H "Content-Type: application/json" --data $obm_setting localhost:8080/api/current/obms | python -mjson.tool
+curl -X PUT -H "Content-Type: application/json" --data $obm_setting http://172.31.128.1:9080/api/current/obms | python -mjson.tool
 set +x
 
 
