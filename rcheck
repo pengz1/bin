@@ -1,12 +1,71 @@
 #!/bin/bash
 
-# RackHD code check list
-code=$1
-unittest=$2
-promise_check = `grep \'Promise\' ${code}`
-mocha_last_dot_check = `grep "expect.*;" ${unittest}`
-expect_last_dot_items = ( 'called' 'notCalled' 'calledOnce' 'calledTwice' 'calledThrice')
+# RackHD product_code check list
+if [ ${1: -8} = '-spec.js' ]
+then
+    product_code=$2
+    unittest=$1
+else
+    product_code=$1
+    unittest=$2
+fi
 
-if [[ promise_check = '' ]]; then
-    echo "Warning: no bluebird promise"
+# http://sinonjs.org/releases/v2.2.0/spies/
+expect_last_items_sinon=( 'called' 'notCalled' 'calledOnce' 'calledTwice' 'calledThrice')
+# http://chaijs.com/api/bdd/
+expect_last_items_chai=(
+    'ok' 'true' 'false' 'null' 'undefined' 'NaN' 'exist' 'empty'
+    'string' 'frozen' 'sealed' 'extensible' 'finite' 'arguments'
+)
+
+check_ut_last_items() {
+    local ut_last_dot_check=`grep -rn "expect.*;$" $1 | grep -v ".*);$" | awk -F "." '{print $NF}' | awk -F ";" '{print $1}'`
+    for item in $ut_last_dot_check
+    do
+        if [ -z `echo $expect_last_items_sinon[@]` -a -z `echo $expect_last_items_chai[@]` ]
+        then
+            echo 'Error: You have invalid unit test method: ${item}'
+        fi
+    done
+}
+
+check_product_code_promise(){
+    # Should use bluebird Promise instead of common Promise
+    # Support bluebird is 'Promise' after di injection
+    if [ -z `grep \'Promise\' $1`]
+    then
+        echo 'Error: You product_code have no explicit call of bluebird Promise'
+    fi
+}
+    
+check_ut_grammar(){
+    set -x
+    ./node_modules/.bin/jshint -c .jshintrc --reporter=checkstyle $1
+    set +x
+    grep -rn console $1
+    grep -rn \.only $1
+    grep -rn \.skip $1
+}
+
+check_product_grammar(){
+    set -x
+    ./node_modules/.bin/jshint -c .jshintrc --reporter=checkstyle $1
+    set +x
+    grep -rn console $1
+}
+
+if [ -n $product_code ]
+then
+    echo "==========================product code grammar check============================"
+    echo "================================================================================"
+    check_product_code_promise $product_code
+    check_product_grammar $product_code
+fi
+
+if [ -n $unittest ]
+then
+    echo "==========================unittest code grammar check==========================="
+    echo "================================================================================"
+    check_ut_last_items $unittest
+    check_ut_grammar $unittest
 fi
