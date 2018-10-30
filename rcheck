@@ -32,7 +32,7 @@ check_ut_last_items() {
 check_product_code_promise(){
     # Should use bluebird Promise instead of common Promise
     # Support bluebird is 'Promise' after di injection
-    if [ -z `grep \'Promise\' $1`]
+    if [ -z `grep \'Promise\' $1` ]
     then
         echo 'Error: You product_code have no explicit call of bluebird Promise'
     fi
@@ -43,8 +43,8 @@ check_ut_grammar(){
     ./node_modules/.bin/jshint -c .jshintrc --reporter=checkstyle $1
     set +x
     grep -rn console $1
-    grep -rn \.only $1
-    grep -rn \.skip $1
+    grep -rn "\.only" $1
+    grep -rn "\.skip" $1
 }
 
 check_product_grammar(){
@@ -54,12 +54,21 @@ check_product_grammar(){
     grep -rn console $1
 }
 
+check_copy_right(){
+    if [ -z `grep \'// Copyright 201[4-9]-2017 Dell Inc. or its subsidiaries.  All Rights Reserved.\' $1` ]
+    then
+        echo 'Error: You product_code have invalid Copyright, use below pattern:'
+        echo '// Copyright 201[4-9]-2017 Dell Inc. or its subsidiaries. All Rights Reserved.'
+    fi
+}
+
 if [ -n $product_code ]
 then
     echo "==========================product code grammar check============================"
     echo "================================================================================"
     check_product_code_promise $product_code
     check_product_grammar $product_code
+    check_copy_right $product_code
 fi
 
 if [ -n $unittest ]
@@ -68,4 +77,5 @@ then
     echo "================================================================================"
     check_ut_last_items $unittest
     check_ut_grammar $unittest
+    check_copy_right $product_code
 fi
